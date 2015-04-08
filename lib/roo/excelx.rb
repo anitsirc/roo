@@ -144,6 +144,8 @@ class Roo::Excelx < Roo::Base
   end
 
   class Sheet
+    attr_reader :name
+
     def initialize(name, rels_path, sheet_path, comments_path, styles, shared_strings, workbook, options = {})
       @name = name
       @rels = Relationships.new(rels_path)
@@ -456,6 +458,19 @@ class Roo::Excelx < Roo::Base
           label.sheet,
         ] ]
     end
+  end
+
+  def find_label(row, col, sheet=nil)
+    sheet = sheet_for(sheet)
+    reversed_labels[[row, col, sheet.name]]
+  end
+
+  def reversed_labels
+    @reversed_labels ||= {}
+    workbook.defined_names.map do |name, label|
+      @reversed_labels[[label.row, label.col, label.sheet.delete("'")]] = name
+    end
+    @reversed_labels
   end
 
   def hyperlink?(row,col,sheet=nil)
